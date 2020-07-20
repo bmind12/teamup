@@ -1,12 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
-const registerRoute = require("./routes/register");
+const usersRoute = require("./routes/users");
 
 const port = 3000;
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(registerRoute);
+app.use(usersRoute);
 
 app.listen(port);

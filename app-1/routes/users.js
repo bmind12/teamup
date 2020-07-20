@@ -2,7 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 
-router.post("/register", (req, res) => {
+router.post("/users", (req, res) => {
   res.send({ req: req.body });
 });
 
