@@ -2,11 +2,14 @@
     "name": "app-1",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "src/server.js",
     "scripts": {
-        "dev": "nodemon index.js",
-        "test": "jest",
+        "dev": "nodemon src/server.js",
+        "test": "npm run dev & jest --watch",
         "format:write": "prettier --write 'src/**/*.js'"
+    },
+    "jest": {
+        "testEnvironment": "node"
     },
     "author": "",
     "license": "ISC",
@@ -17,6 +20,7 @@
     "devDependencies": {
         "jest": "^26.1.0",
         "nodemon": "^2.0.4",
-        "prettier": "^2.0.5"
+        "prettier": "^2.0.5",
+        "supertest": "^4.0.2"
     }
 }
