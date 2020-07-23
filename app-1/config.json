@@ -1,10 +1,10 @@
 {
     "test": {
         "dbHost": "localhost",
-        "dbName": "node-dev"
+        "dbName": "node-test"
     },
     "dev": {
         "dbHost": "localhost",
-        "dbName": "node-test"
+        "dbName": "node-dev"
     }
 }
