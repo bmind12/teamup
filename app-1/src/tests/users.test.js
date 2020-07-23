@@ -12,14 +12,13 @@ const newInclompleteUser = {
     email: 'email@email.email'
 };
 
-describe('/users', () => {
-    beforeAll(async () => {
-        await User.deleteMany();
-    });
+beforeAll(async () => {
+    await User.deleteMany();
+});
 
+describe('POST /users', () => {
     afterAll(async () => {
         await User.deleteMany({});
-        connection.close();
     });
 
     it('Should register user', async (done) => {
@@ -38,5 +37,37 @@ describe('/users', () => {
 
     it('Should respond with 400 error when not all data are provided', (done) => {
         request(app).post('/users').send(newInclompleteUser).expect(400, done);
+    });
+});
+
+describe('DELETE /users/:id', () => {
+    afterAll(async () => {
+        await User.deleteMany({});
+    });
+
+    it('Should return 400 if no id is provided', (done) => {
+        request(app).delete('/users/null').expect(400, done);
+    });
+
+    it('Should return 400 if id is invalid', (done) => {
+        request(app).delete('/users/123123').expect(400, done);
+    });
+
+    it('Should return 400 if no user with such id is found', (done) => {
+        request(app)
+            .delete('/users/5f1930bec422bf5e4d93e573')
+            .expect(400, done);
+    });
+
+    it('Should delete user', async (done) => {
+        const { _id: id } = await User.create(newUser);
+
+        await request(app).delete(`/users/${id}`).expect(200);
+
+        const user = await User.findById(id);
+
+        expect(user).toBeNull();
+
+        done();
     });
 });
