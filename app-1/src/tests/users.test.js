@@ -16,6 +16,10 @@ beforeAll(async () => {
     await User.deleteMany();
 });
 
+afterAll(() => {
+    connection.close();
+});
+
 describe('POST /users', () => {
     afterAll(async () => {
         await User.deleteMany({});
