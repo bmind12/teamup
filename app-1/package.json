@@ -4,11 +4,9 @@
     "description": "",
     "main": "src/server.js",
     "scripts": {
-        "start": "nodemon src/server.js",
-        "dev": "cross-env NODE_ENV=dev npm run start",
-        "dev:test": "cross-env NODE_ENV=test npm run start",
-        "test": "jest",
-        "test:watch": "cross-env NODE_ENV=test jest --watch",
+        "dev": "nodemon src/server.js",
+        "test": "jest --setupFiles dotenv/config",
+        "test:watch": "npm run test --watch",
         "format:write": "prettier --write 'src/**/*.js'"
     },
     "jest": {
@@ -23,7 +21,6 @@
         "mongoose": "^5.9.25"
     },
     "devDependencies": {
-        "cross-env": "^7.0.2",
         "jest": "^26.1.0",
         "nodemon": "^2.0.4",
         "prettier": "^2.0.5",

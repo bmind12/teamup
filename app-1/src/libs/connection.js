@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
-const config = require('../../config');
 
-const url = `mongodb://${config.mongodb.dbHost}/${config.mongodb.dbName}`;
+const url = `mongodb://${process.env.MONGODB_HOST}/${process.env.MONGODB_NAME}`;
 const mongooseConfig = {
     useNewUrlParser: true,
     useUnifiedTopology: true
 };
 
-mongoose.set('debug', config.mongodb.debug);
+mongoose.set('debug', process.env.MONGODB_DEBUG);
 
 module.exports = mongoose.createConnection(url, mongooseConfig);
