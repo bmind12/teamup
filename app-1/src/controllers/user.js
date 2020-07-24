@@ -4,20 +4,25 @@ const User = require('../models/User');
 const DUPLICATE_KEY_ERROR_CODE = 11000;
 
 module.exports.createUser = async (req, res) => {
+    const { email, password } = req.body;
+
     try {
-        const user = await User.create(req.body);
+        const user = new User({ email });
+
+        await user.setPassword(password);
+        await user.save();
 
         res.statusCode = 201;
         res.send(user);
     } catch (err) {
         if (err.code === DUPLICATE_KEY_ERROR_CODE) {
             res.statusCode = 409;
-            res.body = 'Email already exists';
+            return res.send('Email already exists');
         } else {
             res.statusCode = 400;
         }
 
-        res.end();
+        return res.send('An error occured');
     }
 };
 
@@ -44,5 +49,5 @@ module.exports.deleteUser = async (req, res) => {
         return res.send(`User with id: ${id} was not found`);
     }
 
-    res.end();
+    return res.end();
 };

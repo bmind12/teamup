@@ -26,7 +26,7 @@ describe('POST /users', () => {
 
         const user = await User.findOne({ email: newUser.email });
 
-        expect(user).toMatchObject(newUser);
+        expect(user).not.toBeNull();
 
         done();
     });
@@ -60,13 +60,15 @@ describe('DELETE /users/:id', () => {
     });
 
     it('Should delete user', async (done) => {
-        const { _id: id } = await User.create(newUser);
+        const user = new User({ email: newUser.email });
+        await user.setPassword(newUser.password);
+        const { _id: id } = await user.save();
 
         await request(app).delete(`/users/${id}`).expect(200);
 
-        const user = await User.findById(id);
+        const savedUser = await User.findById(id);
 
-        expect(user).toBeNull();
+        expect(savedUser).toBeNull();
 
         done();
     });
