@@ -26,7 +26,17 @@ describe('POST /users', () => {
     });
 
     it('Should register user', async (done) => {
-        await request(app).post('/users').send(newUser).expect(201);
+        const response = await request(app)
+            .post('/users')
+            .send(newUser)
+            .expect(201);
+        const {
+            user: { email },
+            token
+        } = response.body;
+
+        expect(email).toBe(newUser.email);
+        expect(token).not.toBeUndefined();
 
         const user = await User.findOne({ email: newUser.email });
 
@@ -78,33 +88,60 @@ describe('DELETE /users/:id', () => {
     });
 });
 
-// describe('POST /users/login', () => {
-//     beforeAll(async () => {
-//         const { email, password } = newUser;
-//         const user = new User({ email });
+describe('POST /users/login', () => {
+    beforeAll(async () => {
+        const { email, password } = newUser;
+        const user = new User({ email });
 
-//         await user.setPassword(password);
-//         await user.save();
-//     });
-//     afterAll(async () => {
-//         await User.deleteMany({});
-//     });
+        await user.setPassword(password);
+        await user.save();
+    });
 
-//     it('Should return 400 if no email is provided', (done) => {
-//         request(app)
-//             .post('/users/login')
-//             .send({ password: newUser.password })
-//             .expect(400, done);
-//     });
+    afterAll(async () => {
+        await User.deleteMany({});
+    });
 
-//     it('Should return 400 if no password is provided', (done) => {
-//         request(app)
-//             .post('/users/login')
-//             .send({ email: newUser.email })
-//             .expect(400, done);
-//     });
+    it('Should return 400 if no email is provided', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({ password: newUser.password })
+            .expect(400, done);
+    });
 
-//     it('Should return 404 if no email or password are provided', (done) => {
-//         request(app).post('/users/login').expect(400, done);
-//     });
-// });
+    it('Should return 400 if no password is provided', (done) => {
+        request(app)
+            .post('/users/login')
+            .send({ email: newUser.email })
+            .expect(400, done);
+    });
+
+    it('Should return 404 if no user with such email', (done) => {
+        request(app)
+            .post('/users/login')
+            .send(Object.assign({}, newUser, { email: 'wrong@email.com' }))
+            .expect(404, done);
+    });
+
+    it('Should return 401 if wrong password', (done) => {
+        request(app)
+            .post('/users/login')
+            .send(Object.assign({}, newUser, { password: 'wrong-password' }))
+            .expect(401, done);
+    });
+
+    it('Should return a user and 200 if correct credentials', async (done) => {
+        const response = await request(app)
+            .post('/users/login')
+            .send(newUser)
+            .expect(200);
+
+        const {
+            user: { email },
+            token
+        } = response.body;
+
+        expect(email).toBe(newUser.email);
+        expect(token).not.toBeUndefined();
+        done();
+    });
+});

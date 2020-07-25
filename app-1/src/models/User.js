@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const connection = require('../libs/connection');
+const jwt = require('jsonwebtoken');
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -15,7 +16,15 @@ const userSchema = new mongoose.Schema({
     salt: {
         type: String,
         required: true
-    }
+    },
+    tokens: [
+        {
+            token: {
+                type: String,
+                required: true
+            }
+        }
+    ]
 });
 
 userSchema.methods.setPassword = async function (password) {
@@ -28,6 +37,18 @@ userSchema.methods.checkPassword = async function (password) {
 
     const hash = await generatePassword(this.salt, password);
     return hash === this.passwordHash;
+};
+
+userSchema.methods.generateAuthToken = async function () {
+    const token = jwt.sign({ _id: this._id }, this.salt, {
+        expiresIn: '2 days'
+    });
+
+    this.tokens = this.tokens.concat({ token });
+
+    await this.save();
+
+    return token;
 };
 
 function generateSalt() {
