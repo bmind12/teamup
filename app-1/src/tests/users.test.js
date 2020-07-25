@@ -57,10 +57,10 @@ describe('DELETE /users/:id', () => {
         request(app).delete('/users/123123').expect(400, done);
     });
 
-    it('Should return 400 if no user with such id is found', (done) => {
+    it('Should return 404 if no user with such id is found', (done) => {
         request(app)
             .delete('/users/5f1930bec422bf5e4d93e573')
-            .expect(400, done);
+            .expect(404, done);
     });
 
     it('Should delete user', async (done) => {
@@ -77,3 +77,34 @@ describe('DELETE /users/:id', () => {
         done();
     });
 });
+
+// describe('POST /users/login', () => {
+//     beforeAll(async () => {
+//         const { email, password } = newUser;
+//         const user = new User({ email });
+
+//         await user.setPassword(password);
+//         await user.save();
+//     });
+//     afterAll(async () => {
+//         await User.deleteMany({});
+//     });
+
+//     it('Should return 400 if no email is provided', (done) => {
+//         request(app)
+//             .post('/users/login')
+//             .send({ password: newUser.password })
+//             .expect(400, done);
+//     });
+
+//     it('Should return 400 if no password is provided', (done) => {
+//         request(app)
+//             .post('/users/login')
+//             .send({ email: newUser.email })
+//             .expect(400, done);
+//     });
+
+//     it('Should return 404 if no email or password are provided', (done) => {
+//         request(app).post('/users/login').expect(400, done);
+//     });
+// });

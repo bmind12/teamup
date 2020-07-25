@@ -32,7 +32,7 @@ module.exports.deleteUser = async (req, res) => {
 
     const user = await User.findByIdAndDelete(id);
 
-    if (!user) return res.status(400).send(`User with id: ${id} was not found`);
+    if (!user) return res.status(404).send(`User with id: ${id} was not found`);
 
     return res.end();
 };
