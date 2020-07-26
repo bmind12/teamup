@@ -54,37 +54,42 @@ describe('POST /users', () => {
     });
 });
 
-describe('DELETE /users/:id', () => {
+describe('DELETE /users/me', () => {
     afterAll(async () => {
         await User.deleteMany({});
-    });
-
-    it('Should return 400 if no id is provided', (done) => {
-        request(app).delete('/users/null').expect(400, done);
-    });
-
-    it('Should return 400 if id is invalid', (done) => {
-        request(app).delete('/users/123123').expect(400, done);
-    });
-
-    it('Should return 404 if no user with such id is found', (done) => {
-        request(app)
-            .delete('/users/5f1930bec422bf5e4d93e573')
-            .expect(404, done);
     });
 
     it('Should delete user', async (done) => {
         const user = new User({ email: newUser.email });
         await user.setPassword(newUser.password);
         const { _id: id } = await user.save();
+        const token = await user.generateAuthToken();
 
-        await request(app).delete(`/users/${id}`).expect(200);
+        await request(app)
+            .delete(`/users/me`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
 
         const savedUser = await User.findById(id);
 
         expect(savedUser).toBeNull();
 
         done();
+    });
+
+    it('Should return 401 if there is no token', (done) => {
+        request(app).delete('/users/me').expect(401, done);
+    });
+
+    it('Should return 401 if a token is invalid', (done) => {
+        request(app)
+            .delete('/users/me')
+            .set('Authorization', 'Bearer invalid')
+            .expect(401, done);
+    });
+
+    it('Should return 401 if no user with such id is found', (done) => {
+        request(app).delete('/users/me').expect(401, done);
     });
 });
 

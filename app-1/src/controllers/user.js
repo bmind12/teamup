@@ -25,18 +25,9 @@ module.exports.createUser = async (req, res) => {
 };
 
 module.exports.deleteUser = async (req, res) => {
-    const { id } = req.params;
+    const user = await req.user.remove();
 
-    if (!id) return res.status(400).send('User id should be provided');
-
-    if (!mongoose.isValidObjectId(id))
-        return res.status(400).send('User id is invalid');
-
-    const user = await User.findByIdAndDelete(id);
-
-    if (!user) return res.status(404).send(`User with id: ${id} was not found`);
-
-    return res.end();
+    return res.send(user);
 };
 
 module.exports.loginUser = async (req, res) => {
