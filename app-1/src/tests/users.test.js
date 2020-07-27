@@ -154,3 +154,36 @@ describe('POST /users/login', () => {
         done();
     });
 });
+
+describe('POST /users/logoutAll', () => {
+    afterAll(async () => {
+        await User.deleteMany({});
+    });
+
+    it('Should return 401 if not authenticated', (done) => {
+        request(app).post('/users/logoutAll').expect(401, done);
+    });
+
+    it('Should remove all tokens when', async (done) => {
+        const { email, password } = newUser;
+        const user = new User({ email });
+
+        await user.setPassword(password);
+        token = await user.generateAuthToken();
+        await user.save();
+
+        const response = await request(app)
+            .post('/users/logoutAll')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+
+        expect(response.body.user).not.toBeUndefined();
+        expect(response.body.token).toBeUndefined();
+
+        const updatedUser = await User.findById(response.body.user._id);
+
+        expect(updatedUser.tokens.length).toBe(0);
+
+        done();
+    });
+});

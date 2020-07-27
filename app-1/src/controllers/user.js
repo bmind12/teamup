@@ -49,3 +49,12 @@ module.exports.loginUser = async (req, res) => {
 
     return res.send({ user, token });
 };
+
+module.exports.logoutAll = async (req, res) => {
+    const user = req.user;
+
+    user.tokens = [];
+    await user.save();
+
+    res.send({ user });
+};
