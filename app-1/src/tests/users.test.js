@@ -25,17 +25,21 @@ describe('POST /users', () => {
         await User.deleteMany({});
     });
 
-    it('Should register user', async (done) => {
+    it('Should register a user', async (done) => {
         const response = await request(app)
             .post('/users')
             .send(newUser)
             .expect(201);
         const {
             user: { email },
-            token
+            token,
+            salt,
+            passwordHash
         } = response.body;
 
         expect(email).toBe(newUser.email);
+        expect(salt).toBeUndefined();
+        expect(passwordHash).toBeUndefined();
         expect(token).not.toBeUndefined();
 
         const user = await User.findOne({ email: newUser.email });
