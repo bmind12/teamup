@@ -51,6 +51,17 @@ userSchema.methods.generateAuthToken = async function () {
     return token;
 };
 
+userSchema.methods.toJSON = function () {
+    const user = this.toObject();
+
+    delete user.salt;
+    delete user.passwordHash;
+    delete user.tokens;
+    delete user.__v;
+
+    return user;
+};
+
 function generateSalt() {
     return new Promise((resolve, reject) => {
         crypto.randomBytes(+process.env.CRYPTO_LENGTH, (err, buffer) => {
