@@ -39,10 +39,8 @@ userSchema.methods.checkPassword = async function (password) {
     return hash === this.passwordHash;
 };
 
-userSchema.methods.generateAuthToken = async function () {
-    const token = jwt.sign({ _id: this._id }, this.salt, {
-        expiresIn: '2 days'
-    });
+userSchema.methods.generateAuthToken = async function (expiresIn = '2 days') {
+    const token = jwt.sign({ _id: this._id }, this.salt, { expiresIn });
 
     this.tokens = this.tokens.concat({ token });
 

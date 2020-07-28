@@ -10,6 +10,7 @@ module.exports.auth = async (req, res, next) => {
         if (user._id.toString() !== decodedToken._id) throw new Error();
 
         req.user = user;
+        req.token = token;
 
         next();
     } catch (err) {

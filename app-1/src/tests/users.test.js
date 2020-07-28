@@ -164,7 +164,7 @@ describe('POST /users/logoutAll', () => {
         request(app).post('/users/logoutAll').expect(401, done);
     });
 
-    it('Should remove all tokens when', async (done) => {
+    it('Should remove all tokens', async (done) => {
         const { email, password } = newUser;
         const user = new User({ email });
 
@@ -183,6 +183,44 @@ describe('POST /users/logoutAll', () => {
         const updatedUser = await User.findById(response.body.user._id);
 
         expect(updatedUser.tokens.length).toBe(0);
+
+        done();
+    });
+});
+
+describe('POST /users/logout', () => {
+    afterAll(async () => {
+        await User.deleteMany({});
+    });
+
+    it('Should return 401 if not authenticated', (done) => {
+        request(app).post('/users/logout').expect(401, done);
+    });
+
+    it('Should remove all tokens', async (done) => {
+        const { email, password } = newUser;
+        const user = new User({ email });
+
+        await user.setPassword(password);
+        token = await user.generateAuthToken(100);
+        await user.generateAuthToken(200);
+        await user.generateAuthToken(300);
+        await user.save();
+
+        const response = await request(app)
+            .post('/users/logout')
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
+
+        expect(response.body.user).not.toBeUndefined();
+        expect(response.body.token).toBeUndefined();
+
+        const updatedUser = await User.findById(response.body.user._id);
+
+        expect(
+            updatedUser.tokens.find((userToken) => userToken.token === token)
+        ).toBeUndefined();
+        expect(updatedUser.tokens.length).toBe(2);
 
         done();
     });

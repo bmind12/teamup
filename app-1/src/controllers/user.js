@@ -58,3 +58,13 @@ module.exports.logoutAll = async (req, res) => {
 
     res.send({ user });
 };
+
+module.exports.logout = async (req, res) => {
+    const { user, token } = req;
+
+    user.tokens = user.tokens.filter((userToken) => userToken.token !== token);
+
+    await user.save();
+
+    res.send({ user });
+};
