@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('pretty-error').start();
 
 const express = require('express');
 const bodyParser = require('body-parser');
