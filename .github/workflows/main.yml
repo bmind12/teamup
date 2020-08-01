@@ -1,0 +1,30 @@
+name: CI
+
+on:
+    push:
+        branches: [master, develop]
+    pull_request:
+        branches: [master]
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+
+        env:
+            MONGODB_HOST: localhost
+            MONGODB_NAME: test
+            CRYPTO_ITERATIONS: 1
+            CRYPTO_LENGTH: 128
+            CRYPTO_DIGEST: sha512
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Install packages
+              run: npm install
+
+            - name: Prepare MongoDB
+              uses: supercharge/mongodb-github-action@1.3.0
+
+            - name: Testing
+              run: npm run test
