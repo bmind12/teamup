@@ -32,7 +32,6 @@ describe('POST /users', () => {
             .expect(201);
         const {
             user: { email },
-            token,
             salt,
             passwordHash
         } = response.body;
@@ -40,7 +39,7 @@ describe('POST /users', () => {
         expect(email).toBe(newUser.email);
         expect(salt).toBeUndefined();
         expect(passwordHash).toBeUndefined();
-        expect(token).not.toBeUndefined();
+        expect(response.headers['set-cookie'][0]).not.toBeUndefined();
 
         const user = await User.findOne({ email: newUser.email });
 
@@ -64,36 +63,29 @@ describe('DELETE /users/me', () => {
     });
 
     it('Should delete user', async (done) => {
-        const user = new User({ email: newUser.email });
-        await user.setPassword(newUser.password);
-        const { _id: id } = await user.save();
-        const token = await user.generateAuthToken();
+        const response = await request(app).post('/users').send(newUser);
 
         await request(app)
             .delete(`/users/me`)
-            .set('Authorization', `Bearer ${token}`)
+            .set('Cookie', response.headers['set-cookie'][0])
             .expect(200);
 
-        const savedUser = await User.findById(id);
+        const deletedUser = await User.findById(response.body.user._id);
 
-        expect(savedUser).toBeNull();
+        expect(deletedUser).toBeNull();
 
         done();
     });
 
-    it('Should return 401 if there is no token', (done) => {
+    it('Should return 401 if there is no cookie', (done) => {
         request(app).delete('/users/me').expect(401, done);
     });
 
-    it('Should return 401 if a token is invalid', (done) => {
+    it('Should return 401 if a cookie is invalid', (done) => {
         request(app)
             .delete('/users/me')
-            .set('Authorization', 'Bearer invalid')
+            .set('Cookie', ['wrong=cookie'])
             .expect(401, done);
-    });
-
-    it('Should return 401 if no user with such id is found', (done) => {
-        request(app).delete('/users/me').expect(401, done);
     });
 });
 
@@ -124,11 +116,11 @@ describe('POST /users/login', () => {
             .expect(400, done);
     });
 
-    it('Should return 404 if no user with such email', (done) => {
+    it('Should return 401 if no user with such email', (done) => {
         request(app)
             .post('/users/login')
             .send(Object.assign({}, newUser, { email: 'wrong@email.com' }))
-            .expect(404, done);
+            .expect(401, done);
     });
 
     it('Should return 401 if wrong password', (done) => {
@@ -145,50 +137,24 @@ describe('POST /users/login', () => {
             .expect(200);
 
         const {
-            user: { email },
-            token
+            user: { email }
         } = response.body;
 
         expect(email).toBe(newUser.email);
-        expect(token).not.toBeUndefined();
-        done();
-    });
-});
-
-describe('POST /users/logoutAll', () => {
-    afterAll(async () => {
-        await User.deleteMany({});
-    });
-
-    it('Should return 401 if not authenticated', (done) => {
-        request(app).post('/users/logoutAll').expect(401, done);
-    });
-
-    it('Should remove all tokens', async (done) => {
-        const { email, password } = newUser;
-        const user = new User({ email });
-
-        await user.setPassword(password);
-        token = await user.generateAuthToken();
-        await user.save();
-
-        const response = await request(app)
-            .post('/users/logoutAll')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        expect(response.body.user).not.toBeUndefined();
-        expect(response.body.token).toBeUndefined();
-
-        const updatedUser = await User.findById(response.body.user._id);
-
-        expect(updatedUser.tokens.length).toBe(0);
+        expect(response.headers['set-cookie'][0]).not.toBeUndefined();
 
         done();
     });
 });
 
 describe('POST /users/logout', () => {
+    let cookie;
+
+    beforeAll(async () => {
+        const response = await request(app).post('/users').send(newUser);
+        cookie = response.headers['set-cookie'][0];
+    });
+
     afterAll(async () => {
         await User.deleteMany({});
     });
@@ -197,30 +163,19 @@ describe('POST /users/logout', () => {
         request(app).post('/users/logout').expect(401, done);
     });
 
-    it('Should remove all tokens', async (done) => {
-        const { email, password } = newUser;
-        const user = new User({ email });
-
-        await user.setPassword(password);
-        token = await user.generateAuthToken(100);
-        await user.generateAuthToken(200);
-        await user.generateAuthToken(300);
-        await user.save();
-
+    it('Should remove session', async (done) => {
         const response = await request(app)
             .post('/users/logout')
-            .set('Authorization', `Bearer ${token}`)
+            .set('Cookie', cookie)
             .expect(200);
 
         expect(response.body.user).not.toBeUndefined();
-        expect(response.body.token).toBeUndefined();
+        expect(response.headers['set-cookie']).toBeUndefined();
 
-        const updatedUser = await User.findById(response.body.user._id);
-
-        expect(
-            updatedUser.tokens.find((userToken) => userToken.token === token)
-        ).toBeUndefined();
-        expect(updatedUser.tokens.length).toBe(2);
+        await request(app)
+            .post('/users/logout')
+            .set('Cookie', cookie)
+            .expect(401);
 
         done();
     });
