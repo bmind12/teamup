@@ -16,6 +16,7 @@ jobs:
             CRYPTO_ITERATIONS: 1
             CRYPTO_LENGTH: 128
             CRYPTO_DIGEST: sha512
+            SECRET: somesecret
 
         steps:
             - uses: actions/checkout@v2

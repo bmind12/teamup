@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
 const connection = require('../libs/connection');
 
 const userSchema = new mongoose.Schema({
@@ -16,15 +15,7 @@ const userSchema = new mongoose.Schema({
     salt: {
         type: String,
         required: true
-    },
-    tokens: [
-        {
-            token: {
-                type: String,
-                required: true
-            }
-        }
-    ]
+    }
 });
 
 userSchema.methods.setPassword = async function (password) {
@@ -32,21 +23,11 @@ userSchema.methods.setPassword = async function (password) {
     this.passwordHash = await generatePassword(this.salt, password);
 };
 
-userSchema.methods.checkPassword = async function (password) {
+userSchema.methods.isValidPassword = async function (password) {
     if (!password) return false;
 
     const hash = await generatePassword(this.salt, password);
     return hash === this.passwordHash;
-};
-
-userSchema.methods.generateAuthToken = async function (expiresIn = '2 days') {
-    const token = jwt.sign({ _id: this._id }, this.salt, { expiresIn });
-
-    this.tokens = this.tokens.concat({ token });
-
-    await this.save();
-
-    return token;
 };
 
 userSchema.methods.toJSON = function () {
@@ -54,7 +35,6 @@ userSchema.methods.toJSON = function () {
 
     delete user.salt;
     delete user.passwordHash;
-    delete user.tokens;
     delete user.__v;
 
     return user;
