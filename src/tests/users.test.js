@@ -92,10 +92,8 @@ describe('DELETE /users/me', () => {
 describe('POST /users/login', () => {
     beforeAll(async () => {
         const { email, password } = newUser;
-        const user = new User({ email });
 
-        await user.setPassword(password);
-        await user.save();
+        await User.createUser(email, password);
     });
 
     afterAll(async () => {
