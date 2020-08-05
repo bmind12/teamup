@@ -19,6 +19,25 @@ module.exports.create = async (req, res) => {
     }
 };
 
+module.exports.updateUser = async (req, res) => {
+    try {
+        const newData = req.body;
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            newData,
+            { new: true }
+        );
+
+        return res.send({ user: updatedUser });
+    } catch (err) {
+        if (err.code === DUPLICATE_KEY_ERROR_CODE) {
+            return res.status(409).send('Email already exists');
+        }
+
+        return res.status(400).send('An error occured');
+    }
+};
+
 module.exports.deleteUser = async (req, res) => {
     const user = await req.user.remove();
 

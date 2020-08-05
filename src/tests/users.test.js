@@ -2,15 +2,12 @@ const request = require('supertest');
 const connection = require('../libs/connection');
 const User = require('../models/User');
 const app = require('../app');
-
-const newUser = {
-    email: 'email@email.email',
-    password: 'test1234'
-};
-
-const newInclompleteUser = {
-    email: 'email@email.email'
-};
+const {
+    newUser,
+    newUser2,
+    newUser3,
+    newInclompleteUser
+} = require('./userData');
 
 beforeAll(async () => {
     await User.deleteMany();
@@ -22,7 +19,7 @@ afterAll(() => {
 
 describe('POST /users', () => {
     afterAll(async () => {
-        await User.deleteMany({});
+        await User.deleteMany();
     });
 
     it('Should register a user', async (done) => {
@@ -59,7 +56,7 @@ describe('POST /users', () => {
 
 describe('DELETE /users/me', () => {
     afterAll(async () => {
-        await User.deleteMany({});
+        await User.deleteMany();
     });
 
     it('Should delete user', async (done) => {
@@ -97,7 +94,7 @@ describe('POST /users/login', () => {
     });
 
     afterAll(async () => {
-        await User.deleteMany({});
+        await User.deleteMany();
     });
 
     it('Should return 400 if no email is provided', (done) => {
@@ -154,7 +151,7 @@ describe('POST /users/logout', () => {
     });
 
     afterAll(async () => {
-        await User.deleteMany({});
+        await User.deleteMany();
     });
 
     it('Should return 401 if not authenticated', (done) => {
@@ -174,6 +171,50 @@ describe('POST /users/logout', () => {
             .post('/users/logout')
             .set('Cookie', cookie)
             .expect(401);
+
+        done();
+    });
+});
+
+describe('PATCH users/me', () => {
+    let cookie;
+
+    beforeAll(async () => {
+        const response = await request(app).post('/users').send(newUser);
+
+        await request(app).post('/users').send(newUser2);
+
+        cookie = response.headers['set-cookie'][0];
+    });
+
+    afterAll(async () => {
+        await User.deleteMany();
+    });
+
+    it('should return 401 for without a cookie', (done) => {
+        request(app).patch('/users/me').expect(401, done);
+    });
+
+    it('should not update user email if it already exists', (done) => {
+        request(app)
+            .patch('/users/me')
+            .set('Cookie', cookie)
+            .send({ email: newUser2.email })
+            .expect(409, done);
+    });
+
+    it('should update user', async (done) => {
+        const response = await request(app)
+            .patch('/users/me')
+            .set('Cookie', cookie)
+            .send(newUser3)
+            .expect(200);
+
+        const {
+            user: { email }
+        } = response.body;
+
+        expect(email).toBe(newUser3.email);
 
         done();
     });
