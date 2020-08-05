@@ -3,14 +3,11 @@ const { authenticateLocal } = require('../libs/passport');
 
 const DUPLICATE_KEY_ERROR_CODE = 11000;
 
-module.exports.createUser = async (req, res) => {
+module.exports.create = async (req, res) => {
     const { email, password } = req.body;
 
     try {
-        const user = new User({ email });
-
-        await user.setPassword(password);
-        await user.save();
+        const user = await User.createUser(email, password);
 
         authenticateLocal(req, res, () => res.status(201).send({ user }));
     } catch (err) {
@@ -28,7 +25,7 @@ module.exports.deleteUser = async (req, res) => {
     return res.send(user);
 };
 
-module.exports.loginUser = async (req, res) => {
+module.exports.login = async (req, res) => {
     res.send({ user: req.user });
 };
 

@@ -40,6 +40,15 @@ userSchema.methods.toJSON = function () {
     return user;
 };
 
+userSchema.statics.createUser = async function (email, password) {
+    const user = new User({ email });
+
+    await user.setPassword(password);
+    await user.save();
+
+    return user;
+};
+
 function generateSalt() {
     return new Promise((resolve, reject) => {
         crypto.randomBytes(+process.env.CRYPTO_LENGTH, (err, buffer) => {
