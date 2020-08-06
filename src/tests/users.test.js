@@ -1,6 +1,6 @@
 const request = require('supertest');
 const connection = require('../libs/connection');
-const User = require('../models/User');
+import User from '../models/User';
 const app = require('../app');
 const {
     newUser,

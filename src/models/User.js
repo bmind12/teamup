@@ -1,6 +1,6 @@
-const crypto = require('crypto');
-const mongoose = require('mongoose');
-const connection = require('../libs/connection');
+import crypto from 'crypto';
+import mongoose from 'mongoose';
+import connection from '../libs/connection';
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -78,4 +78,4 @@ function generatePassword(salt, password) {
 
 const User = connection.model('User', userSchema);
 
-module.exports = User;
+export default User;
