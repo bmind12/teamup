@@ -2,6 +2,8 @@
     "name": "teamup",
     "description": "",
     "version": "0.0.1",
+    "author": "Sergey Ryabov",
+    "license": "ISC",
     "scripts": {
         "dev": "sapper dev",
         "build": "sapper build --legacy",
@@ -10,27 +12,25 @@
         "cy:run": "cypress run",
         "cy:open": "cypress open",
         "test": "run-p --race dev cy:run",
-        "test:jest": "jest --setupFiles dotenv/config",
-        "test:jest:watch": "npm run test -- --watch",
         "format:write": "prettier --write 'src/**/*.js'"
     },
     "jest": {
         "testEnvironment": "node"
     },
-    "author": "Sergey Ryabov",
-    "license": "ISC",
     "dependencies": {
+        "@polka/send-type": "^0.5.2",
         "body-parser": "^1.19.0",
+        "compose-middleware": "^5.0.1",
         "compression": "^1.7.1",
         "connect-mongo": "^3.2.0",
         "cookie-parser": "^1.4.5",
         "dotenv": "^8.2.0",
-        "express": "^4.17.1",
         "express-session": "^1.17.1",
         "mongoose": "^5.9.25",
         "morgan": "^1.10.0",
         "passport": "^0.4.1",
         "passport-local": "^1.0.0",
+        "polka": "next",
         "pretty-error": "^2.1.1",
         "sirv": "^1.0.0"
     },

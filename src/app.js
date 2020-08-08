@@ -25,8 +25,6 @@ app.use(sirv('static', { dev }));
 app.use(
     sapper.middleware({
         session: (req, res) => {
-            console.log('### req.cookies', req.cookies);
-            console.log('### req.body', req.body);
             return {
                 user: req.user
             };

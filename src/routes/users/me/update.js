@@ -1,4 +1,7 @@
 import send from '@polka/send-type';
+import User from '../../../models/User';
+
+const DUPLICATE_KEY_ERROR_CODE = 11000; // TODO: violates DRY
 
 export async function patch(req, res) {
     try {
