@@ -1,7 +1,13 @@
+import { compose } from 'compose-middleware';
 import send from '@polka/send-type';
 
-export async function del(req, res) {
-    const user = await req.user.remove();
+import auth from '../../../middleware/auth';
 
-    return send(res, 200, { user });
-}
+export const del = compose([
+    auth,
+    async (req, res) => {
+        const user = await req.user.remove();
+
+        return send(res, 200, { user });
+    }
+]);
