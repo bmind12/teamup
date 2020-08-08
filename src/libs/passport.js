@@ -1,6 +1,6 @@
-const passport = require('passport');
-const localStrategy = require('./strategies/local');
-const User = require('../models/User');
+import passport from 'passport';
+import localStrategy from './strategies/local';
+import User from '../models/User';
 
 passport.use(localStrategy);
 passport.serializeUser((user, done) => done(null, user._id));
@@ -14,5 +14,6 @@ passport.deserializeUser(async (id, done) => {
     }
 });
 
-module.exports.authenticateLocal = passport.authenticate('local');
-module.exports.passport = passport;
+export const authenticateLocal = passport.authenticate('local');
+
+export default passport;

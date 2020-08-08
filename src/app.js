@@ -1,24 +1,35 @@
-require('dotenv').config();
-require('pretty-error').start();
+import './config';
+import sirv from 'sirv';
+import polka from 'polka';
+import compression from 'compression';
+import * as sapper from '@sapper/server';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+import passport from './libs/passport';
+import initSession from './libs/session';
 
-const express = require('express');
-const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const morgan = require('morgan');
+const dev = process.env.NODE_ENV === 'development';
+const app = polka();
 
-const app = express();
+const session = initSession(app);
 
-const session = require('./libs/session')(app);
-const { passport } = require('./libs/passport');
-const usersRoute = require('./routes/users');
-
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan('dev'));
-app.use(usersRoute);
+app.use(compression({ threshold: 0 }));
+app.use(sirv('static', { dev }));
+app.use(
+    sapper.middleware({
+        session: (req, res) => {
+            return {
+                user: req.user
+            };
+        }
+    })
+);
 
-module.exports = app;
+export default app;
