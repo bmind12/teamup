@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use(session);
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(morgan('dev'));
+app.use(morgan('dev')); // TODO: make conditional, only for dev
 app.use(compression({ threshold: 0 }));
 app.use(sirv('static', { dev }));
 app.use(
