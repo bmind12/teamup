@@ -1,10 +1,18 @@
 import { compose } from 'compose-middleware';
 import send from '@polka/send-type';
-
 import auth from '../../../middleware/auth';
 import User from '../../../models/User';
 
 const DUPLICATE_KEY_ERROR_CODE = 11000; // TODO: violates DRY
+
+export const del = compose([
+    auth,
+    async (req, res) => {
+        const user = await req.user.remove();
+
+        return send(res, 200, { user });
+    }
+]);
 
 export const patch = compose([
     auth,
