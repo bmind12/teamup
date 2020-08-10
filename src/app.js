@@ -26,7 +26,7 @@ app.use(
     sapper.middleware({
         session: (req, res) => {
             return {
-                user: req.user
+                user: req.body
             };
         }
     })
