@@ -11,7 +11,9 @@
         "start": "node __sapper__/build",
         "cy:run": "cypress run",
         "cy:open": "cypress open",
-        "test": "run-p --race dev cy:run",
+        "test": "is-ci \"test:ci\" \"test:dev\"",
+        "test:ci": "run-p --race dev cy:run",
+        "test:dev": "run-p --race dev cy:open",
         "format:write": "prettier --write 'src/**/*.js'"
     },
     "jest": {
@@ -26,6 +28,7 @@
         "cookie-parser": "^1.4.5",
         "dotenv": "^8.2.0",
         "express-session": "^1.17.1",
+        "is-ci-cli": "^2.1.2",
         "mongoose": "^5.9.25",
         "morgan": "^1.10.0",
         "passport": "^0.4.1",
