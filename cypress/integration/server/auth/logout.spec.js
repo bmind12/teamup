@@ -1,4 +1,4 @@
-import { user1 } from '../../fixtures/users';
+import { user1 } from '../../../fixtures/users';
 
 describe('Logout', () => {
     before(() => {
