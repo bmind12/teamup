@@ -1,47 +1,49 @@
-import { user1, user2, user3 } from '../../fixtures/users';
-
 describe('User deletion', () => {
+    let registeredUser, validCookie;
+
     before(() => {
         cy.task('clean:users');
-        cy.request({
-            url: '/auth/register',
-            method: 'POST',
-            body: user1
+        cy.buildUser().then((user) => {
+            cy.registerUser(user).then(() => {
+                registeredUser = user;
+
+                cy.getCookie('connect.sid').then((cookie) => {
+                    validCookie = cookie.value;
+                });
+            });
         });
     });
 
-    it('Should delete user', async () => {
+    after(() => {
+        cy.task('clean:users');
+    });
+
+    it('should not delete if cookie is invalid', () => {
+        cy.setCookie('connect.sid', 'wrong');
         cy.request({
             url: '/users/me',
             method: 'DELETE',
-            body: user1
-        }).then((response) => {
-            expect(response.status).to.equal(200);
-        });
-    });
-
-    it('Should return 401 when logging in if there is no user', () => {
-        cy.request({
-            url: '/auth/login',
-            method: 'POST',
-            body: user1,
             failOnStatusCode: false
         }).then((response) => {
             expect(response.status).to.equal(401);
         });
     });
 
-    it('Should return 401 if a cookie is invalid', () => {
-        cy.request({
-            url: '/auth/register',
-            method: 'POST',
-            body: user1
-        });
-        cy.setCookie('connect.sid', 'wrong');
+    it('should delete user', () => {
+        cy.setCookie('connect.sid', validCookie);
         cy.request({
             url: '/users/me',
-            method: 'DELETE',
-            body: user1,
+            method: 'DELETE'
+        }).then((response) => {
+            expect(response.status).to.equal(200);
+        });
+    });
+
+    it('should not log in if no user', () => {
+        cy.request({
+            url: '/auth/login',
+            method: 'POST',
+            body: registeredUser,
             failOnStatusCode: false
         }).then((response) => {
             expect(response.status).to.equal(401);
@@ -50,49 +52,58 @@ describe('User deletion', () => {
 });
 
 describe('User update', () => {
+    let anotherUser, validCookie;
+
     before(() => {
         cy.task('clean:users');
-        cy.request({
-            url: '/auth/register',
-            method: 'POST',
-            body: user2
+        cy.buildUser().then((user) => {
+            cy.registerUser(user).then(() => {
+                anotherUser = user;
+            });
         });
-        cy.request({
-            url: '/auth/register',
-            method: 'POST',
-            body: user1
+        cy.buildUser().then((user) => {
+            cy.registerUser(user);
+
+            cy.getCookie('connect.sid').then((cookie) => {
+                validCookie = cookie.value;
+            });
         });
     });
 
-    it('should not update user email if it already exists', () => {
+    after(() => {
+        cy.task('clean:users');
+    });
+
+    it('should update user', () => {
+        cy.buildUser().then((user) => {
+            cy.request({
+                url: '/users/me',
+                method: 'PATCH',
+                body: { email: user.email }
+            }).then((response) => {
+                expect(response.status).to.equal(200);
+                expect(response.body.user.email).to.equal(user.email);
+            });
+        });
+    });
+
+    it('should not update email if such email already exists', () => {
+        cy.setCookie('connect.sid', validCookie);
         cy.request({
             url: '/users/me',
             method: 'PATCH',
-            body: { email: user2.email },
+            body: { email: anotherUser.email },
             failOnStatusCode: false
         }).then((response) => {
-            console.log('### response', response);
             expect(response.status).to.equal(409);
         });
     });
 
-    it('should update user', async () => {
+    it('should not update user without a cookie', () => {
         cy.request({
             url: '/users/me',
             method: 'PATCH',
-            body: { email: user3.email }
-        }).then((response) => {
-            expect(response.status).to.equal(401);
-            expect(response.body.user.email).toBe(user3.email);
-        });
-    });
-
-    it('should return 401 for without a cookie', () => {
-        cy.clearCookies();
-        cy.request({
-            url: '/users/me',
-            method: 'PATCH',
-            body: user1,
+            body: anotherUser,
             failOnStatusCode: false
         }).then((response) => {
             expect(response.status).to.equal(401);
