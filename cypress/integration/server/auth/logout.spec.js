@@ -1,16 +1,20 @@
-import { user1 } from '../../../fixtures/users';
-
 describe('Logout', () => {
     before(() => {
         cy.task('clean:users');
-        cy.request({
-            url: '/auth/register',
-            method: 'POST',
-            body: user1
+        cy.buildUser().then((user) => {
+            cy.request({
+                url: '/auth/register',
+                method: 'POST',
+                body: user
+            });
         });
     });
 
-    it('Should remove session', () => {
+    after(() => {
+        cy.task('clean:users');
+    });
+
+    it('should remove session', () => {
         cy.request({
             url: '/auth/logout',
             method: 'POST'
@@ -21,7 +25,7 @@ describe('Logout', () => {
         });
     });
 
-    it('Should not log out if already logged out', () => {
+    it('should not log out if not logged in', () => {
         cy.request({
             url: '/auth/logout',
             method: 'POST',
