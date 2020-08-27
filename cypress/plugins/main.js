@@ -1,5 +1,5 @@
-import '../../src/config';
-import User from '../../src/models/User';
+import 'config';
+import User from 'models/User';
 
 async function cleanUsers() {
     await User.deleteMany();
