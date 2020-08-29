@@ -1,18 +1,15 @@
 describe('Signup page', () => {
-    before(() => {
-        cy.task('clean:users');
-    });
-
-    beforeEach(() => {
-        cy.visit('/register');
-    });
-
     it('registers a user', () => {
+        cy.visit('/register');
         cy.buildUser().then((user) => {
-            cy.findByLabelText(/email/i).type(user.email);
-            cy.findByLabelText(/password/i).type(user.password);
+            cy.findByLabelText(/email/i).type(user.email, {
+                force: true
+            });
+            cy.findByLabelText(/password/i).type(user.password, {
+                force: true
+            });
             cy.findByRole('button').click();
-            cy.location('pathname').should('include', 'users');
+            cy.location('pathname').should('include', '/users/me');
         });
     });
 });
