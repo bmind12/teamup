@@ -1,7 +1,7 @@
 import { compose } from 'compose-middleware';
 import send from '@polka/send-type';
-import auth from '../../../middleware/auth';
-import User from '../../../models/User';
+import auth from '../../middleware/auth';
+import User from '../../models/User';
 
 const DUPLICATE_KEY_ERROR_CODE = 11000; // TODO: violates DRY
 
