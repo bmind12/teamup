@@ -21,7 +21,7 @@ describe('User deletion', () => {
     it('should not delete if cookie is invalid', () => {
         cy.setCookie('connect.sid', 'wrong');
         cy.request({
-            url: '/users/me',
+            url: '/auth/user',
             method: 'DELETE',
             failOnStatusCode: false
         }).then((response) => {
@@ -32,7 +32,7 @@ describe('User deletion', () => {
     it('should delete user', () => {
         cy.setCookie('connect.sid', validCookie);
         cy.request({
-            url: '/users/me',
+            url: '/auth/user',
             method: 'DELETE'
         }).then((response) => {
             expect(response.status).to.equal(200);
@@ -77,7 +77,7 @@ describe('User update', () => {
     it('should update user', () => {
         cy.buildUser().then((user) => {
             cy.request({
-                url: '/users/me',
+                url: '/auth/user',
                 method: 'PATCH',
                 body: { email: user.email }
             }).then((response) => {
@@ -90,7 +90,7 @@ describe('User update', () => {
     it('should not update email if such email already exists', () => {
         cy.setCookie('connect.sid', validCookie);
         cy.request({
-            url: '/users/me',
+            url: '/auth/user',
             method: 'PATCH',
             body: { email: anotherUser.email },
             failOnStatusCode: false
@@ -101,7 +101,7 @@ describe('User update', () => {
 
     it('should not update user without a cookie', () => {
         cy.request({
-            url: '/users/me',
+            url: '/auth/user',
             method: 'PATCH',
             body: anotherUser,
             failOnStatusCode: false
